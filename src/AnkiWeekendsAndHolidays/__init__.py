@@ -14,8 +14,7 @@ def today_date():
 
 def due_to_date(due):
     # global datetime
-    day = today_date() + datetime.timedelta(days=due)
-    return day
+    return today_date() + datetime.timedelta(days=due)
 
 
 def dues_to_skip_relative():
@@ -28,21 +27,11 @@ def dues_to_skip_relative():
     return res
 
 
-def dues_to_skip():
-    today = mw.col.sched.today
-    return [
-        t + today for t in dues_to_skip_relative()
-    ]
-
-
 def cards_to_reschedule():
-    to_skip = dues_to_skip()
+    to_skip = dues_to_skip_relative()
     res = []
     for t in to_skip:
-        # does n queries, would probably be better with a single one, but
-        # there is no trivial way to do it.
-        res += mw.col.db.list(
-            "SELECT id FROM cards WHERE due = ? ORDER BY due ASC", t)
+        res += cards_due_on_relative_day(t)
     return res
 
 
@@ -64,22 +53,15 @@ def best_relative_day(day, ivl, days_to_skip=None):
     days_to_skip = days_to_skip or dues_to_skip_relative()
     possible_relative_days = _possible_relative_days(
         day, ivl, days_to_skip)
-    cards_due_nums = [
-        cards_due_on_relative_day(d) for d in possible_relative_days]
-    min_ = min(cards_due_nums)
-    min_index = cards_due_nums.index(min_)
-    return possible_relative_days[min_index]
+    return min(possible_relative_days, key=cards_due_on_relative_day)
 
 
 def cards_due_on_relative_day(day):
-    due = mw.col.sched.today + day
-    return mw.col.db.list(
-        "SELECT COUNT(*) FROM cards WHERE due = ?",
-        due)[0]
+    return mw.col.find_cards(f'prop:due={day}')
 
 
 def reschedule_card(card_id, days_to_skip=None):
-    card = mw.col.getCard(card_id)
+    card = mw.col.get_card(card_id)
     relative_due = card.due - mw.col.sched.today
     try:
         best_relative_due = best_relative_day(relative_due, card.ivl,
@@ -98,10 +80,9 @@ def reschedule_all_cards():
     days_to_skip = dues_to_skip_relative()
     card_ids = cards_to_reschedule()
     for card_id in card_ids:
-        print(card_id)
         reschedule_card(card_id, days_to_skip)
-    showInfo("""Successfully rescheduled cards originally scheduled on
-             unwanted days.""")
+    showInfo(
+        """Successfully rescheduled cards originally scheduled on unwanted days.""")
 
 
 action = QAction("Reschedule Cards (Weekends and Holidays addon)", mw)
