@@ -1,4 +1,5 @@
 import datetime
+
 from aqt import mw
 from aqt.qt import QAction, QKeySequence
 from aqt.utils import showInfo
@@ -9,6 +10,7 @@ config = mw.addonManager.getConfig(__name__)
 def today_date():
     return datetime.datetime.fromtimestamp(
         mw.col.crt + mw.col.sched.today*86400).date()
+
 
 def due_to_date(due):
     # global datetime
@@ -40,7 +42,7 @@ def cards_to_reschedule():
         # does n queries, would probably be better with a single one, but
         # there is no trivial way to do it.
         res += mw.col.db.list(
-             "SELECT id FROM cards WHERE due = ? ORDER BY due ASC", t)
+            "SELECT id FROM cards WHERE due = ? ORDER BY due ASC", t)
     return res
 
 
