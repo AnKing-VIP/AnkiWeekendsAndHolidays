@@ -1,33 +1,41 @@
-[Get the addon for your Anki from here](https://ankiweb.net/shared/info/1222550498)
+<b>This add-on was funded by the Anki Palace. Please consider supporting our work using the links below so we can continue to fund add-on projects like this.</b>
 
-# Move Reviews from Weekends and Holidays
+You must be on Anki *** to use this add-on
 
-Do you want to take a break from doing your Anki reviews without having them pile up on the weekends, holidays or a vacation? Or do you have specific days on the week when you're too busy to do the reviews? Then this add-on is the solution to your problem!
+*** Add-on description
 
-It works by re-scheduling the already scheduled cards anytime by moving them either before, or after the specified days. By default, the intervals never change by more than 10\%, or by 7 days in any case.
+<div><b>Screenshots</b></div>
+<img src="https://raw.githubusercontent.com/ankipalace/anki-field-autocomplete/master/screenshots/dropdown.gif?raw=true">
+  <br>
+  <br>
 
-## Mobile and other addons
+<b>Problems, Bugs, Errors, Improvements</b>
+If you find a serious bug, please submit it on <a href="https://github.com/ankipalace/" rel="nofollow">Github</a> or email us at ankingmed@gmail.com. Please remember that we are not coders and thus may not be able to provide support.
 
-This add-on plays well with mobile versions of Anki (AnkiMobile/AnkiDroid), assuming that the user also uses the desktop version, as the cards scheduled on mobile will be moved away from the specified days when the rescheduling is run (with _Ctrl+Shift+r_), or at every startup if run at startup is chosen at configuration options.
+<b>Changelog:</b>
+  <br>
+2021***: Initial Release
 
-The add-on does not directly modify the scheduler, but instead reschedules already schedules cards, so it should play well with addons that patch the scheduler (for example, load balancer), *but this is untested*.
 
-## Images
-Before using the add-on reschedule:
-![Before](https://raw.githubusercontent.com/vasarmilan/AnkiWeekendsAndHolidays/master/static/before.png)
+<b>Please consider checking out our:</b>
+<br>
+<a href="https://www.youtube.com/theanking/playlists" rel="nofollow">YouTube Channel</a>- <i>How to use Anki for beginners and advanced users.</i> 
+<br>
+<a href="https://www.instagram.com/ankingmed" rel="nofollow">Instagram</a>/<a href="https://www.facebook.com/ankingmed" rel="nofollow">Facebook</a>: <i>@Ankingmed</i>
+<br>
+<a href="https://www.ankingmed.com" rel="nofollow">www.AnKingMed.com</a>- <i>Recommended add-ons, tutorials and more including <b>how to download 40+ add-ons in &lt; 5min</b></i>
+<br>
+<a href="https://www.ankipalace.com/membership" rel="nofollow">Patreon</a>- <i>Support our work and <b>get individualized Anki help!</b></i><br>
 
-After:
-![After](https://raw.githubusercontent.com/vasarmilan/AnkiWeekendsAndHolidays/master/static/after.png)
-## Usage and configuration
+<a href="https://www.ankingmed.com" rel="nofollow"><img src="https://raw.githubusercontent.com/AnKingMed/My-images/master/AnKing/AnKingSmall.png?raw=true"></a><a href="https://www.ankingmed.com" rel="nofollow"><img src="https://raw.githubusercontent.com/AnKingMed/My-images/master/AnKing/TheAnKing.png?raw=true"></a>
+  <br>
+  <a href="https://www.facebook.com/ankingmed" rel="nofollow"><img src="https://raw.githubusercontent.com/AnKingMed/My-images/master/Social/FB.png?raw=true"></a>     <a href="https://www.instagram.com/ankingmed" rel="nofollow"><img src="https://raw.githubusercontent.com/AnKingMed/My-images/master/Social/Instagram.png?raw=true"></a>     <a href="https://www.youtube.com/theanking" rel="nofollow"><img src="https://raw.githubusercontent.com/AnKingMed/My-images/master/Social/YT.png?raw=true"></a>     <a href="https://www.tiktok.com/@ankingmed" rel="nofollow"><img src="https://raw.githubusercontent.com/AnKingMed/My-images/master/Social/TikTok.png?raw=true"></a>     <a href="https://www.twitter.com/ankingmed" rel="nofollow"><img src="https://raw.githubusercontent.com/AnKingMed/My-images/master/Social/Twitter.png?raw=true"></a>
 
-By default, the add-on will free up the weekends and nothing else. However, this behaviour can be changed to move the reviews away from specific dates and/or any day of the week.
+<a href="https://www.ankipalace.com/membership" rel="nofollow"><img src="https://raw.githubusercontent.com/AnKingMed/My-images/master/AnKing/Patreon.jpg?raw=true"></a>
 
-Config can be edited in the Tools -> Add-on(Ctrl+Shift+A) -> Move Reviews from Weekends and Holidays. *Make sure to restart Anki after editing the configuration*.
-
-Once you've set the dates and days of the week that you want to free up, you can use the shortcut *Ctrl+Shift+r* (by default) to reschedule the cards.
-
-## Bug reports and source code
-
-The source code is accessible at: https://github.com/vasarmilan/AnkiWeekendsAndHolidays
-
-Please submit bug reports here, if you encounter any problems. PRs are also welcome.
+<b>      Check out our Anki Mastery Course! <br>
+    (The source of funding for this project)</b><br>
+          <a href="https://courses.ankipalace.com/?utm_source=anking_bg_add-on&amp;utm_medium=anki_add-on_page&amp;utm_campaign=mastery_course" rel="nofollow">https://courses.ankipalace.com</a>
+<a href="https://courses.ankipalace.com/?utm_source=anking_bg_add-on&amp;utm_medium=anki_add-on_page&amp;utm_campaign=mastery_course" rel="nofollow">
+  <br>
+  <img src="https://raw.githubusercontent.com/AnKingMed/My-images/master/AnKing/AnkiPalace.png?raw=true"></a>

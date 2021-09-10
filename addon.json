@@ -1,0 +1,13 @@
+{
+    "display_name": "WeekendsAndHolidays",
+    "module_name": "AnkiWeekendsAndHolidays",
+    "repo_name": "AnkiWeekendsAndHolidays",
+    "ankiweb_id": "",
+    "author": "",
+    "conflicts": [],
+    "targets": [
+        "anki21"
+    ],
+    "min_anki_version" : "2.1.1",
+    "max_tested_anki_version" : "2.1.47+"
+}
