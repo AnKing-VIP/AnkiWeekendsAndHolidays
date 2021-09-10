@@ -2,7 +2,7 @@ import datetime
 
 from aqt import mw
 from aqt.qt import QAction, QKeySequence
-from aqt.utils import showInfo
+from aqt.utils import showInfo, tooltip
 
 config = mw.addonManager.getConfig(__name__)
 
@@ -81,8 +81,8 @@ def reschedule_all_cards():
     card_ids = cards_to_reschedule()
     for card_id in card_ids:
         reschedule_card(card_id, days_to_skip)
-    showInfo(
-        """Successfully rescheduled cards originally scheduled on unwanted days.""")
+    tooltip(
+        """Successfully rescheduled cards""")
 
 
 action = QAction("Reschedule Cards (Weekends and Holidays addon)", mw)
