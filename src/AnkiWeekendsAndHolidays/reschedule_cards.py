@@ -6,9 +6,8 @@ from aqt.qt import QAction, QKeySequence
 from aqt.utils import showInfo, tooltip
 
 from .compat import add_compat_aliases
-from .consts import ANKI_VERSION_TUPLE
-
-config = mw.addonManager.getConfig(__name__)
+from .config import conf
+from .consts import ANKI_VERSION_TUPLE, WEEKDAYS_SHORT_NAMES
 
 
 def today_date():
@@ -23,12 +22,20 @@ def due_to_date(due):
 
 def dues_to_skip_relative():
     res = list()
-    for t in range(config['max_days_lookahead']):
-        if due_to_date(t).weekday() in config['weekdays_skip']:
+    for t in range(conf['max_days_lookahead']):
+        if due_to_date(t).weekday() in weekdays_to_skip():
             res.append(t)
-        elif due_to_date(t).isoformat() in config['dates']:
+        elif due_to_date(t).isoformat() in conf['dates']:
             res.append(t)
     return res
+
+
+def weekdays_to_skip():
+    return [
+        idx
+        for idx, name in enumerate(WEEKDAYS_SHORT_NAMES)
+        if conf['skip_' + name] == True
+    ]
 
 
 def cards_to_reschedule():
@@ -39,11 +46,8 @@ def cards_to_reschedule():
     return res
 
 
-def _possible_relative_days(day, ivl, days_to_skip):
-    max_diff = int(min([
-        config['max_change_days'] or 7,
-        ivl*config['max_change_percent']/100
-    ]))
+def _possible_relative_days(day, days_to_skip):
+    max_diff = conf['max_change_days']
     min_day = day - max_diff
     max_day = day + max_diff
     res = list()
@@ -53,11 +57,10 @@ def _possible_relative_days(day, ivl, days_to_skip):
     return res
 
 
-def best_relative_day(day, ivl, days_to_skip=None):
+def best_relative_day(day, days_to_skip=None):
     days_to_skip = days_to_skip or dues_to_skip_relative()
-    possible_relative_days = _possible_relative_days(
-        day, ivl, days_to_skip)
-    return min(possible_relative_days, key=cards_due_on_relative_day)
+    possible_relative_days = _possible_relative_days(day, days_to_skip)
+    return min(possible_relative_days, key=lambda x: len(cards_due_on_relative_day(x)))
 
 
 def cards_due_on_relative_day(day):
@@ -70,10 +73,16 @@ def reschedule_card(card_id, undo_entry_id, days_to_skip=None):
     if mw.col.decks.config_dict_for_deck_id(card.current_deck_id()).get('weekends_disabled'):
         return False
 
+    # Anki considers cards with intervals greater than 21 days as mature
+    if conf["only_mature_cards"] and card.ivl < 21:
+        return False
+
+    if card.ivl < conf["min_interval_days"]:
+        return False
+
     relative_due = card.due - mw.col.sched.today
     try:
-        best_relative_due = best_relative_day(relative_due, card.ivl,
-                                              days_to_skip)
+        best_relative_due = best_relative_day(relative_due, days_to_skip)
     # ValueError when no possible date to reschedule,
     # then leave at original due date.
     except ValueError:
@@ -102,9 +111,11 @@ def reschedule_all_cards():
 
     days_to_skip = dues_to_skip_relative()
     card_ids = cards_to_reschedule()
+    cnt = 0
     for card_id in card_ids:
-        reschedule_card(card_id, undo_entry_id, days_to_skip)
-    tooltip("Rescheduled cards")
+        if reschedule_card(card_id, undo_entry_id, days_to_skip):
+            cnt += 1
+    tooltip(f"Rescheduled {cnt} card(s)")
 
     if ANKI_VERSION_TUPLE < (2, 1, 45):
         mw.col.reset()
@@ -114,8 +125,8 @@ def reschedule_all_cards():
 def add_menu_action():
     action = QAction("Reschedule Cards (Weekends and Holidays addon)", mw)
     action.triggered.connect(reschedule_all_cards)
-    if config['shortcut']:
-        action.setShortcut(QKeySequence(config['shortcut']))
+    if conf['shortcut']:
+        action.setShortcut(QKeySequence(conf['shortcut']))
     mw.form.menuTools.addAction(action)
 
 
@@ -137,7 +148,7 @@ def _main():
 
     add_menu_action()
 
-    if config.get('execute_at_startup'):
+    if conf['execute_at_startup']:
         add_startup_action()
 
 
