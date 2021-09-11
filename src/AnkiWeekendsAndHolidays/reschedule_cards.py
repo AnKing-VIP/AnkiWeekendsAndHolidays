@@ -89,7 +89,7 @@ def reschedule_all_cards():
     for card_id in card_ids:
         reschedule_card(card_id, days_to_skip)
     tooltip(
-        """Successfully rescheduled cards""")
+        """Rescheduled cards""")
 
 
 def add_menu_action():
