@@ -1,9 +1,11 @@
 
 import datetime
 
-from aqt import mw
+from aqt import gui_hooks, mw
 from aqt.qt import QAction, QKeySequence
 from aqt.utils import showInfo, tooltip
+
+from .compat import add_compat_aliases
 
 config = mw.addonManager.getConfig(__name__)
 
@@ -100,7 +102,6 @@ def add_menu_action():
 
 def add_startup_action():
     try:
-        from aqt import gui_hooks
         gui_hooks.profile_did_open.append(reschedule_all_cards)
     except Exception:
         try:
@@ -112,8 +113,14 @@ def add_startup_action():
                      https://github.com/vasarmilan/AnkiWeekendsAndHolidays""")
 
 
-def main():
+def _main():
+    add_compat_aliases()
+
     add_menu_action()
 
     if config.get('execute_at_startup'):
         add_startup_action()
+
+
+def main():
+    gui_hooks.profile_did_open.append(_main)

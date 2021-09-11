@@ -1,10 +1,28 @@
 import json
 from pathlib import Path
 
-from aqt import gui_hooks
+import aqt
+from anki import version as anki_version
+from anki.hooks import wrap
+from aqt import deckconf, gui_hooks
+from PyQt5 import QtCore, QtWidgets
 
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    def _fromUtf8(s):
+        return s
+
+ANKI_VERSION_TUPLE = tuple(int(i) for i in anki_version.split("."))
 
 def setup_deck_options():
+    if ANKI_VERSION_TUPLE >= (2, 1, 45):
+        setup_new_deck_options()
+
+    setup_old_deck_options()
+
+
+def setup_new_deck_options():
     dir = Path(__file__).parent / 'web'
 
     with open(dir / "raw.html") as f:
@@ -16,4 +34,39 @@ def setup_deck_options():
         dialog.web.eval(script.replace("HTML_CONTENT", json.dumps(html)))
 
     gui_hooks.deck_options_did_load.append(on_mount)
-    
+
+
+def setup_old_deck_options():
+    aqt.forms.dconf.Ui_Dialog.setupUi = wrap(
+        aqt.forms.dconf.Ui_Dialog.setupUi, setup_ui, pos="after")
+    deckconf.DeckConf.loadConf = wrap(
+        deckconf.DeckConf.loadConf, load_conf, pos="after")
+    deckconf.DeckConf.saveConf = wrap(
+        deckconf.DeckConf.saveConf, save_conf, pos="before")
+
+
+def setup_ui(self, Dialog):
+    r = self.gridLayout_3.rowCount()
+    gridLayout_3 = QtWidgets.QGridLayout()
+
+    self.DisableFW = QtWidgets.QCheckBox(self.tab_3)
+    self.DisableFW.setObjectName(_fromUtf8("DisableFW"))
+    self.DisableFW.setText(
+        'Disable Weekends and holidays (affects all decks in this option group)')
+    self.DisableFW.setDisabled(False)
+    gridLayout_3.addWidget(self.DisableFW, r, 0, 1, 3)
+    r += 1
+
+    self.verticalLayout_4.insertLayout(1, gridLayout_3)
+
+
+def load_conf(self):
+    f = self.form
+    c = self.conf
+    f.DisableFW.setCheckState(c.get('weekends_disabled', 0))
+
+
+def save_conf(self):
+    f = self.form
+    c = self.conf
+    c['weekends_disabled'] = int(f.DisableFW.checkState())
