@@ -2,10 +2,11 @@ import json
 from pathlib import Path
 
 import aqt
-from anki import version as anki_version
 from anki.hooks import wrap
 from aqt import deckconf, gui_hooks
 from PyQt5 import QtCore, QtWidgets
+
+from .consts import ANKI_VERSION_TUPLE
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -13,7 +14,6 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
-ANKI_VERSION_TUPLE = tuple(int(i) for i in anki_version.split("."))
 
 def setup_deck_options():
     if ANKI_VERSION_TUPLE >= (2, 1, 45):

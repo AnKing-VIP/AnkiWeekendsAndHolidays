@@ -6,6 +6,7 @@ from aqt.qt import QAction, QKeySequence
 from aqt.utils import showInfo, tooltip
 
 from .compat import add_compat_aliases
+from .consts import ANKI_VERSION_TUPLE
 
 config = mw.addonManager.getConfig(__name__)
 
@@ -63,7 +64,7 @@ def cards_due_on_relative_day(day):
     return mw.col.find_cards(f'prop:due={day}')
 
 
-def reschedule_card(card_id, days_to_skip=None):
+def reschedule_card(card_id, undo_entry_id, days_to_skip=None):
     card = mw.col.get_card(card_id)
 
     if mw.col.decks.config_dict_for_deck_id(card.current_deck_id()).get('weekends_disabled'):
@@ -77,19 +78,37 @@ def reschedule_card(card_id, days_to_skip=None):
     # then leave at original due date.
     except ValueError:
         return False
+
     due = best_relative_due + mw.col.sched.today
     card.due = due
-    card.flush()
+
+    if ANKI_VERSION_TUPLE >= (2, 1, 45):
+        mw.col.update_card(card)
+        mw.col.merge_undo_entries(undo_entry_id)
+    else:
+        card.flush()
+
     return True
 
 
 def reschedule_all_cards():
+
+    # if anki version is >= 2.1.45, the new undo system is used and the old otherwise
+    undo_entry_id = None
+    if ANKI_VERSION_TUPLE >= (2, 1, 45):
+        undo_entry_id = mw.col.add_custom_undo_entry("Rescheduling")
+    else:
+        mw.checkpoint("Reschedule")
+
     days_to_skip = dues_to_skip_relative()
     card_ids = cards_to_reschedule()
     for card_id in card_ids:
-        reschedule_card(card_id, days_to_skip)
-    tooltip(
-        """Rescheduled cards""")
+        reschedule_card(card_id, undo_entry_id, days_to_skip)
+    tooltip("Rescheduled cards")
+
+    if ANKI_VERSION_TUPLE < (2, 1, 45):
+        mw.col.reset()
+        mw.reset()
 
 
 def add_menu_action():
