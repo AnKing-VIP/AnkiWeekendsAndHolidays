@@ -1,11 +1,9 @@
 
 import datetime
 
-from aqt import gui_hooks, mw
-from aqt.qt import QAction, QKeySequence
-from aqt.utils import showInfo, tooltip
+from aqt import mw
+from aqt.utils import tooltip
 
-from .compat import add_compat_aliases
 from .config import conf
 from .consts import ANKI_VERSION_TUPLE, WEEKDAYS_SHORT_NAMES
 
@@ -120,37 +118,3 @@ def reschedule_all_cards():
     if ANKI_VERSION_TUPLE < (2, 1, 45):
         mw.col.reset()
         mw.reset()
-
-
-def add_menu_action():
-    action = QAction("Reschedule Cards (Weekends and Holidays addon)", mw)
-    action.triggered.connect(reschedule_all_cards)
-    if conf['shortcut']:
-        action.setShortcut(QKeySequence(conf['shortcut']))
-    mw.form.menuTools.addAction(action)
-
-
-def add_startup_action():
-    try:
-        gui_hooks.profile_did_open.append(reschedule_all_cards)
-    except Exception:
-        try:
-            from anki.hooks import addHook
-            addHook("profileLoaded", reschedule_all_cards)
-        except Exception:
-            showInfo("""Automatic rescheduling failed: incompatible version
-                     If you see this message, please consider submitting a bug report at:
-                     https://github.com/vasarmilan/AnkiWeekendsAndHolidays""")
-
-
-def _main():
-    add_compat_aliases()
-
-    add_menu_action()
-
-    if conf['execute_at_startup']:
-        add_startup_action()
-
-
-def main():
-    gui_hooks.profile_did_open.append(_main)

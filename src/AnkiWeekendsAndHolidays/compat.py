@@ -4,7 +4,7 @@ from aqt import mw
 from .utils import add_compat_alias
 
 
-def add_compat_aliases():
+def setup_compat_aliases():
 
     add_compat_alias(mw.col, 'get_card', 'getCard')
     add_compat_alias(

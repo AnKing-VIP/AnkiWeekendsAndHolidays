@@ -46,7 +46,7 @@ def general_tab(conf_window: ConfigWindow) -> None:
     tab.checkbox("execute_at_startup", "reschedule cards on startup")
     tab.addSpacerItem(QSpacerItem(0, 15))
 
-    tab.text("You can disable this add-on for specific decks in the deck options")
+    tab.text("<i>You can disable this add-on for specific decks in the deck options</i>", html=True)
     tab.addSpacerItem(QSpacerItem(0, 15))
 
     def _reschedule_cards():
