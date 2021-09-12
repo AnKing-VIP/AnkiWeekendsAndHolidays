@@ -1,3 +1,5 @@
+This add-on is compatible with Anki 2.1.28 - 2.1.47+
+
 <b>This add-on was funded by the Anki Palace. Please consider supporting our work using the links below so we can continue to fund add-on projects like this.</b>
 
 You must be on Anki *** to use this add-on
