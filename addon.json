@@ -3,11 +3,11 @@
     "module_name": "AnkiWeekendsAndHolidays",
     "repo_name": "AnkiWeekendsAndHolidays",
     "ankiweb_id": "",
-    "author": "",
+    "author": "RisingOrange",
     "conflicts": [],
     "targets": [
         "anki21"
     ],
-    "min_anki_version" : "2.1.1",
+    "min_anki_version" : "2.1.28",
     "max_tested_anki_version" : "2.1.47+"
 }
