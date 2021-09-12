@@ -1,7 +1,8 @@
-from AnkiWeekendsAndHolidays.ankiaddonconfig import window
-from AnkiWeekendsAndHolidays.consts import WEEKDAYS_SHORT_NAMES
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QSpacerItem, QWidget
+from PyQt5.QtWidgets import QPushButton, QSpacerItem, QWidget
+
+from AnkiWeekendsAndHolidays.consts import WEEKDAYS_SHORT_NAMES
+
 from .ankiaddonconfig import ConfigManager, ConfigWindow
 from .gui.anking_widgets import AnkingIconsLayout, AnkiPalaceLayout
 
@@ -44,8 +45,18 @@ def general_tab(conf_window: ConfigWindow) -> None:
 
     tab.checkbox("execute_at_startup", "reschedule cards on startup")
     tab.addSpacerItem(QSpacerItem(0, 15))
-    
+
     tab.text("You can disable this add-on for specific decks in the deck options")
+    tab.addSpacerItem(QSpacerItem(0, 15))
+
+    def _reschedule_cards():
+
+        # importing here to prevent circular import
+        from .reschedule_cards import reschedule_all_cards
+        reschedule_all_cards()
+    tab.reschedule_button = QPushButton("Reschedule cards")
+    tab.reschedule_button.clicked.connect(_reschedule_cards)
+    tab.addWidget(tab.reschedule_button)
 
     tab.stretch()
 
