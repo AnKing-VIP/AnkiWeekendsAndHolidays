@@ -11,5 +11,10 @@ def setup_compat_aliases():
         mw.col.decks, 'config_dict_for_deck_id', 'confForDid')
 
     def _current_deck_id(self):
-        return mw.col.decks.for_card_ids([self.id])[0]
-    Card.current_deck_id = _current_deck_id
+        result = mw.col.decks.for_card_ids([self.id])
+        if result:
+            return result[0]
+        else:
+            return None
+    if "current_deck_id" not in Card.__dict__.keys():
+        Card.current_deck_id = _current_deck_id
