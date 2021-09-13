@@ -120,6 +120,8 @@ def reschedule_all_cards():
     else:
         mw.checkpoint("Reschedule")
 
+    mw.progress.start(label="Rescheduling... [Weekends and Holidays add-on]")
+
     days_to_skip = dues_to_skip_relative()
     card_ids = cards_to_reschedule()
     cards = [mw.col.get_card(cid) for cid in card_ids]
@@ -132,3 +134,5 @@ def reschedule_all_cards():
     if ANKI_VERSION_TUPLE < (2, 1, 45):
         mw.col.reset()
         mw.reset()
+        
+    mw.progress.finish()
