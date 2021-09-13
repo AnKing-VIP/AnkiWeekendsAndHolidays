@@ -1,12 +1,15 @@
+from aqt import mw
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QPushButton, QSpacerItem, QWidget
 
-from AnkiWeekendsAndHolidays.consts import WEEKDAYS_SHORT_NAMES
-
 from .ankiaddonconfig import ConfigManager, ConfigWindow
+from .consts import WEEKDAYS_SHORT_NAMES
 from .gui.anking_widgets import AnkingIconsLayout, AnkiPalaceLayout
 
-conf = ConfigManager()
+if mw is not None:
+    conf = ConfigManager()
+else:
+    conf = None
 
 
 def general_tab(conf_window: ConfigWindow) -> None:

@@ -28,5 +28,5 @@ def main():
     if conf['execute_at_startup']:
         gui_hooks.profile_did_open.append(reschedule_all_cards)
 
-
-main()
+if mw is not None:
+    main()
