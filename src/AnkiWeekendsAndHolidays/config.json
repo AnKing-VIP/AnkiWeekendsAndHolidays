@@ -12,7 +12,7 @@
     "only_mature_cards": false,
     "min_interval_days": 0,
     "execute_at_startup": false,
-    "max_change_days": 7,
+    "max_change_days": 30,
     "max_days_lookahead": 365,
     "shortcut": "Ctrl+Shift+w"
 }

@@ -44,8 +44,7 @@ def cards_to_reschedule():
     return res
 
 
-def _possible_relative_days(day, days_to_skip):
-    max_diff = conf['max_change_days']
+def _possible_relative_days(day, max_diff, days_to_skip):
     min_day = day - max_diff
     max_day = day + max_diff
     res = list()
@@ -55,18 +54,28 @@ def _possible_relative_days(day, days_to_skip):
     return res
 
 
-def best_relative_day(day, days_to_skip=None):
+def best_relative_day(day, ivl, days_to_skip=None):
     days_to_skip = days_to_skip or dues_to_skip_relative()
-    possible_relative_days = _possible_relative_days(day, days_to_skip)
-    return min(possible_relative_days, key=lambda x: len(cards_due_on_relative_day(x)))
+
+    cur_diff = int(0.1 * ivl)
+    while True:
+        possible_relative_days = _possible_relative_days(day, cur_diff, days_to_skip)
+        if possible_relative_days:
+            possible_relative_days = sorted(
+                possible_relative_days, key=lambda x: abs(x - day))
+            return min(possible_relative_days, key=lambda x: len(cards_due_on_relative_day(x)))
+        
+        cur_diff += max(int(0.05 * ivl), 1)
+
+        if cur_diff >= conf.get("max_change_days"):
+            return None
 
 
 def cards_due_on_relative_day(day):
     return mw.col.find_cards(f'prop:due={day}')
 
 
-def reschedule_card(card_id, undo_entry_id, days_to_skip=None):
-    card = mw.col.get_card(card_id)
+def reschedule_card(card, undo_entry_id, days_to_skip=None):
 
     if mw.col.decks.config_dict_for_deck_id(card.current_deck_id()).get('weekends_disabled'):
         return False
@@ -80,10 +89,14 @@ def reschedule_card(card_id, undo_entry_id, days_to_skip=None):
 
     relative_due = card.due - mw.col.sched.today
     try:
-        best_relative_due = best_relative_day(relative_due, days_to_skip)
+        best_relative_due = best_relative_day(
+            relative_due, card.ivl, days_to_skip)
     # ValueError when no possible date to reschedule,
     # then leave at original due date.
     except ValueError:
+        return False
+    
+    if best_relative_due is None:
         return False
 
     due = best_relative_due + mw.col.sched.today
@@ -109,9 +122,10 @@ def reschedule_all_cards():
 
     days_to_skip = dues_to_skip_relative()
     card_ids = cards_to_reschedule()
+    cards = [mw.col.get_card(cid) for cid in card_ids]
     cnt = 0
-    for card_id in card_ids:
-        if reschedule_card(card_id, undo_entry_id, days_to_skip):
+    for card in cards:
+        if reschedule_card(card, undo_entry_id, days_to_skip):
             cnt += 1
     tooltip(f"Rescheduled {cnt} card(s)")
 
