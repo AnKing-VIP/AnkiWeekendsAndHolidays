@@ -1,22 +1,27 @@
-This add-on is compatible with Anki 2.1.28 - 2.1.47+
-
 <b>This add-on was funded by the Anki Palace. Please consider supporting our work using the links below so we can continue to fund add-on projects like this.</b>
 
-You must be on Anki *** to use this add-on
+You must be on Anki 2.1.28 or higher to use this add-on.
 
 *** Add-on description
 
 <div><b>Screenshots</b></div>
-<img src="https://raw.githubusercontent.com/ankipalace/anki-field-autocomplete/master/screenshots/dropdown.gif?raw=true">
+<b>Before</b>
+<img src="https://raw.githubusercontent.com/ankipalace/AnkiWeekendsAndHolidays/master/screenshots/Before.jpg?raw=true">
+  <br>
+<b>After (skip sundays)</b>
+<img src="https://raw.githubusercontent.com/ankipalace/AnkiWeekendsAndHolidays/master/screenshots/After1.jpg?raw=true">
+  <br>
+<b>After (skip weekends)</b>
+<img src="https://raw.githubusercontent.com/ankipalace/AnkiWeekendsAndHolidays/master/screenshots/After2.jpg?raw=true">
   <br>
   <br>
 
 <b>Problems, Bugs, Errors, Improvements</b>
-If you find a serious bug, please submit it on <a href="https://github.com/ankipalace/" rel="nofollow">Github</a> or email us at ankingmed@gmail.com. Please remember that we are not coders and thus may not be able to provide support.
+If you find a serious bug, please submit it on <a href="https://github.com/ankipalace/AnkiWeekendsAndHolidays/issues" rel="nofollow">Github</a> or email us at ankingmed@gmail.com. Please remember that we are not coders and thus may not be able to provide support.
 
 <b>Changelog:</b>
   <br>
-2021***: Initial Release
+2021-9-12: Initial Release
 
 
 <b>Please consider checking out our:</b>
