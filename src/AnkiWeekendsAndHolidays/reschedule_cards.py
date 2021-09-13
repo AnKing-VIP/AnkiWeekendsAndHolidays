@@ -23,7 +23,7 @@ def dues_to_skip_relative():
     for t in range(conf['max_days_lookahead']):
         if due_to_date(t).weekday() in weekdays_to_skip():
             res.append(t)
-        elif due_to_date(t).isoformat() in conf['dates']:
+        elif due_to_date(t).isoformat() in conf['skip_dates']:
             res.append(t)
     return res
 

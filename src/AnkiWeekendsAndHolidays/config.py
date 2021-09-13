@@ -1,6 +1,7 @@
-from aqt import mw
+import datetime
+from aqt import mw, Qt
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QPushButton, QSpacerItem, QWidget
+from PyQt5.QtWidgets import QDateEdit, QFormLayout, QFrame, QHBoxLayout, QPushButton, QScrollArea, QSpacerItem, QWidget
 
 from .ankiaddonconfig import ConfigManager, ConfigWindow
 from .consts import WEEKDAYS_SHORT_NAMES
@@ -49,7 +50,8 @@ def general_tab(conf_window: ConfigWindow) -> None:
     tab.checkbox("execute_at_startup", "reschedule cards on startup")
     tab.addSpacerItem(QSpacerItem(0, 15))
 
-    tab.text("<i>You can disable this add-on for specific decks in the deck options</i>", html=True)
+    tab.text(
+        "<i>You can disable this add-on for specific decks in the deck options</i>", html=True)
     tab.addSpacerItem(QSpacerItem(0, 15))
 
     def _reschedule_cards():
@@ -60,8 +62,119 @@ def general_tab(conf_window: ConfigWindow) -> None:
     tab.reschedule_button = QPushButton("Reschedule cards")
     tab.reschedule_button.clicked.connect(_reschedule_cards)
     tab.addWidget(tab.reschedule_button)
+    tab.text(
+        "<i>Rescheduling is undoable from Browser->Edit->Undo Rescheduling", html=True)
 
     tab.stretch()
+
+
+def setup_dates_layout(conf_window):
+    dates_layout = QFormLayout(conf_window)
+    inner_widget = QWidget()
+    inner_widget.setLayout(dates_layout)
+    scroll = QScrollArea()
+    scroll.setWidgetResizable(True)
+    scroll.setFrameShape(QFrame.NoFrame)
+    scroll.setWidget(inner_widget)
+    return dates_layout, scroll
+
+
+def dates_tab(conf_window):
+    tab = conf_window.add_tab("Holidays")
+
+    tab.text("Specify start and end dates for times you want to move cards away from")
+
+    dates_layout, scroll = setup_dates_layout(conf_window)
+    tab.addWidget(scroll)
+
+    dates_layout.rows = []
+
+    def update_skip_dates_config():
+        dates = []
+        for row in dates_layout.rows:
+            if row.start_edit.date() == row.end_edit.date():
+                dates.append(row.start_edit.date().toString(format=Qt.ISODate))
+            else:
+                dates.append([
+                    row.start_edit.date().toString(format=Qt.ISODate),
+                    row.end_edit.date().toString(format=Qt.ISODate)
+                ])
+        conf.set("skip_dates", dates)
+
+    def update_dates_view():
+
+        for row in dates_layout.rows:
+            remove_row_from_ui(row)
+        dates_layout.rows = []
+
+        for date_info in conf.get("skip_dates"):
+            row = QHBoxLayout()
+
+            if isinstance(date_info, list):
+                start_date_str, end_date_str = date_info
+            else:
+                start_date_str, end_date_str = date_info, date_info
+
+            row.start_edit = QDateEdit(
+                date=datetime.date.fromisoformat(start_date_str))
+            row.end_edit = QDateEdit(
+                date=datetime.date.fromisoformat(end_date_str))
+
+            row.end_edit.setMinimumDate(row.start_edit.date())
+
+            row.start_edit.setCalendarPopup(True)
+            row.end_edit.setCalendarPopup(True)
+
+            def on_start_date_changed(row):
+                row.end_edit.setMinimumDate(row.start_edit.date())
+                update_skip_dates_config()
+            row.start_edit.dateChanged.connect(
+                lambda *_, row=row: on_start_date_changed(row))
+            row.addWidget(row.start_edit)
+
+            row.end_edit.dateChanged.connect(update_skip_dates_config)
+            row.addWidget(row.end_edit)
+
+            def on_delete_button_click(row):
+                remove_row_from_ui(row)
+                dates_layout.rows.remove(row)
+                update_skip_dates_config()
+                update_dates_view()
+
+            row.delete_button = QPushButton(text="X")
+            row.delete_button.setFixedSize(18, 18)
+            row.delete_button.clicked.connect(
+                lambda _, row=row: on_delete_button_click(row))
+            row.addWidget(row.delete_button)
+
+            dates_layout.rows.append(row)
+            dates_layout.addRow(row)
+
+    def on_add_button_click():
+        skip_dates = conf.get("skip_dates")
+        skip_dates.append(str(datetime.date.today()))
+        update_dates_view()
+
+    def remove_row_from_ui(row):
+        deleteItemsOfLayout(row)
+        dates_layout.removeItem(row)
+
+    update_dates_view()
+
+    dates_layout.add_button = QPushButton(text="Add")
+    dates_layout.add_button.clicked.connect(on_add_button_click)
+    tab.addWidget(dates_layout.add_button)
+
+
+def deleteItemsOfLayout(layout):
+    if layout is not None:
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.setParent(None)
+            else:
+                deleteItemsOfLayout(item.layout())
 
 
 def add_anking_header(conf_window):
@@ -124,3 +237,4 @@ def setup_config():
     conf.use_custom_window()
 
     conf.add_config_tab(general_tab)
+    conf.add_config_tab(dates_tab)
