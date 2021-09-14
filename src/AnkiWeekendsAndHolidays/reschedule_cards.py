@@ -119,6 +119,7 @@ class CardsDueOnRelativeDayDict(dict):
 def reschedule_all_cards():
 
     # if anki version is >= 2.1.45, the new undo system is used and the old otherwise
+    undo_entry_id = None
     if ANKI_VERSION_TUPLE >= (2, 1, 45):
         undo_entry_id = mw.col.add_custom_undo_entry("Rescheduling")
     else:
