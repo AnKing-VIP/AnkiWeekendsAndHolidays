@@ -1,4 +1,3 @@
-
 import datetime
 
 from aqt import mw
@@ -19,13 +18,13 @@ def due_to_date(due):
 
 
 def dues_to_skip_relative():
-    res = list()
+    res = set()
     for t in range(conf['max_days_lookahead']):
         if due_to_date(t).weekday() in weekdays_to_skip():
-            res.append(t)
+            res.add(t)
         elif due_to_date(t).isoformat() in conf['skip_dates']:
-            res.append(t)
-    return res
+            res.add(t)
+    return list(res)
 
 
 def weekdays_to_skip():
