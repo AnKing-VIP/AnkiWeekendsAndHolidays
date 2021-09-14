@@ -106,7 +106,7 @@ def reschedule_card(card, undo_entry_id, days_to_skip=None):
         mw.col.merge_undo_entries(undo_entry_id)
     else:
         card.flush()
-
+        
     return True
 
 
@@ -119,19 +119,32 @@ def reschedule_all_cards():
     else:
         mw.checkpoint("Reschedule")
 
-    mw.progress.start(label="Rescheduling... [Weekends and Holidays add-on]")
 
     days_to_skip = dues_to_skip_relative()
     card_ids = cards_to_reschedule()
     cards = [mw.col.get_card(cid) for cid in card_ids]
     cnt = 0
-    for card in cards:
+    mw.progress.start(label="Rescheduling...")
+    for i, card in enumerate(cards):
         if reschedule_card(card, undo_entry_id, days_to_skip):
             cnt += 1
+
+        mw.progress.update(value=i, max=len(cards))
+        mw.app.processEvents()
+
+        if mw.progress.want_cancel():
+            mw.progress.finish()
+            if ANKI_VERSION_TUPLE >= (2, 1, 45):
+                mw.col.undo()
+            else:
+                mw.col.undo_legacy()
+            mw.reset()
+            return
+
     tooltip(f"Rescheduled {cnt} card(s)")
 
     if ANKI_VERSION_TUPLE < (2, 1, 45):
         mw.col.reset()
-        mw.reset()
         
     mw.progress.finish()
+    mw.reset()

@@ -66,7 +66,7 @@ def general_tab(conf_window: ConfigWindow) -> None:
     tab.reschedule_button.clicked.connect(_reschedule_cards)
     tab.addWidget(tab.reschedule_button)
     tab.text(
-        "<i>Rescheduling is undoable from Browser->Edit->Undo Rescheduling", html=True)
+        "<i>Rescheduling is undoable (Edit->Undo Rescheduling)", html=True)
 
     tab.stretch()
 
