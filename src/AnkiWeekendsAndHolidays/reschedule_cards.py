@@ -119,16 +119,16 @@ def reschedule_all_cards():
     else:
         mw.checkpoint("Reschedule")
 
-    mw.progress.start(label="Rescheduling...")
 
     days_to_skip = dues_to_skip_relative()
     card_ids = cards_to_reschedule()
     cards = [mw.col.get_card(cid) for cid in card_ids]
     cnt = 0
-    for card in cards:
+    mw.progress.start(label="Rescheduling...")
+    for i, card in enumerate(cards):
         if reschedule_card(card, undo_entry_id, days_to_skip):
             cnt += 1
-        mw.progress.update()
+        mw.progress.update(value=i, max=len(cards))
         mw.app.processEvents()
 
     tooltip(f"Rescheduled {cnt} card(s)")
