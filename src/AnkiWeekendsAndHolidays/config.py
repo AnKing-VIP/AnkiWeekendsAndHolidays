@@ -71,17 +71,6 @@ def general_tab(conf_window: ConfigWindow) -> None:
     tab.stretch()
 
 
-def setup_dates_layout(conf_window):
-    dates_layout = QFormLayout(conf_window)
-    inner_widget = QWidget()
-    inner_widget.setLayout(dates_layout)
-    scroll = QScrollArea()
-    scroll.setWidgetResizable(True)
-    scroll.setFrameShape(QFrame.NoFrame)
-    scroll.setWidget(inner_widget)
-    return dates_layout, scroll
-
-
 def dates_tab(conf_window):
     tab = conf_window.add_tab("Holidays")
 
@@ -167,6 +156,17 @@ def dates_tab(conf_window):
     dates_layout.add_button = QPushButton(text="Add")
     dates_layout.add_button.clicked.connect(on_add_button_click)
     tab.addWidget(dates_layout.add_button)
+
+
+def setup_dates_layout(conf_window):
+    dates_layout = QFormLayout()
+    inner_widget = QWidget()
+    inner_widget.setLayout(dates_layout)
+    scroll = QScrollArea()
+    scroll.setWidgetResizable(True)
+    scroll.setFrameShape(QFrame.NoFrame)
+    scroll.setWidget(inner_widget)
+    return dates_layout, scroll
 
 
 def deleteItemsOfLayout(layout):
