@@ -44,26 +44,23 @@ def cards_to_reschedule():
 
 
 def _possible_relative_days(day, max_diff, days_to_skip):
-    min_day = day - max_diff
+    min_day = max(day - max_diff, 0)
     max_day = day + max_diff
-    res = list()
-    for t in range(min_day, max_day + 1):
-        if t not in days_to_skip and t >= 0:
-            res.append(t)
-    return res
+    return filter(lambda x: x not in days_to_skip, range(min_day, max_day+1))
 
 
-def best_relative_day(day, ivl, days_to_skip=None):
+def best_relative_day(day, ivl, num_cards_due_on_day, days_to_skip=None):
     days_to_skip = days_to_skip or dues_to_skip_relative()
 
     cur_diff = int(0.1 * ivl)
     while True:
-        possible_relative_days = _possible_relative_days(day, cur_diff, days_to_skip)
+        possible_relative_days = _possible_relative_days(
+            day, cur_diff, days_to_skip)
         if possible_relative_days:
             possible_relative_days = sorted(
                 possible_relative_days, key=lambda x: abs(x - day))
-            return min(possible_relative_days, key=lambda x: len(cards_due_on_relative_day(x)))
-        
+            return min(possible_relative_days, key=lambda x: num_cards_due_on_day[x])
+
         cur_diff += max(int(0.05 * ivl), 1)
 
         if cur_diff >= conf.get("max_change_days"):
@@ -74,7 +71,7 @@ def cards_due_on_relative_day(day):
     return mw.col.find_cards(f'prop:due={day}')
 
 
-def reschedule_card(card, undo_entry_id, days_to_skip=None):
+def reschedule_card(card, undo_entry_id, num_cards_due_on_day, days_to_skip=None):
 
     if mw.col.decks.config_dict_for_deck_id(card.current_deck_id()).get('weekends_disabled'):
         return False
@@ -89,36 +86,46 @@ def reschedule_card(card, undo_entry_id, days_to_skip=None):
     relative_due = card.due - mw.col.sched.today
     try:
         best_relative_due = best_relative_day(
-            relative_due, card.ivl, days_to_skip)
+            relative_due, card.ivl, num_cards_due_on_day, days_to_skip)
     # ValueError when no possible date to reschedule,
     # then leave at original due date.
     except ValueError:
         return False
-    
+
     if best_relative_due is None:
         return False
 
     due = best_relative_due + mw.col.sched.today
     card.due = due
 
+    num_cards_due_on_day[best_relative_due] += 1
+
     if ANKI_VERSION_TUPLE >= (2, 1, 45):
         mw.col.update_card(card)
         mw.col.merge_undo_entries(undo_entry_id)
     else:
         card.flush()
-        
+
     return True
+
+
+class CardsDueOnRelativeDayDict(dict):
+
+    def __missing__(self, key):
+        res = self[key] = len(cards_due_on_relative_day(key))
+        return res
 
 
 def reschedule_all_cards():
 
     # if anki version is >= 2.1.45, the new undo system is used and the old otherwise
-    undo_entry_id = None
     if ANKI_VERSION_TUPLE >= (2, 1, 45):
         undo_entry_id = mw.col.add_custom_undo_entry("Rescheduling")
     else:
         mw.checkpoint("Reschedule")
 
+    # using this instead of calling len(card(due_on_relative_day(day))) everytime because that is slow
+    num_cards_due_on_day = CardsDueOnRelativeDayDict()
 
     days_to_skip = dues_to_skip_relative()
     card_ids = cards_to_reschedule()
@@ -126,7 +133,7 @@ def reschedule_all_cards():
     cnt = 0
     mw.progress.start(label="Rescheduling...")
     for i, card in enumerate(cards):
-        if reschedule_card(card, undo_entry_id, days_to_skip):
+        if reschedule_card(card, undo_entry_id, num_cards_due_on_day, days_to_skip):
             cnt += 1
 
         mw.progress.update(value=i, max=len(cards))
@@ -145,6 +152,6 @@ def reschedule_all_cards():
 
     if ANKI_VERSION_TUPLE < (2, 1, 45):
         mw.col.reset()
-        
+
     mw.progress.finish()
     mw.reset()

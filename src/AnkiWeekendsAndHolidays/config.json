@@ -12,6 +12,6 @@
     "execute_on_synch": false,
     "execute_on_close": false,
     "max_change_days": 30,
-    "max_days_lookahead": 365,
+    "max_days_lookahead": 90,
     "shortcut": "Ctrl+Shift+w"
 }
