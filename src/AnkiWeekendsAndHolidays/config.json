@@ -9,7 +9,8 @@
     "skip_sun": true,
     "only_mature_cards": false,
     "min_interval_days": 0,
-    "execute_at_startup": false,
+    "execute_on_synch": false,
+    "execute_on_close": false,
     "max_change_days": 30,
     "max_days_lookahead": 365,
     "shortcut": "Ctrl+Shift+w"

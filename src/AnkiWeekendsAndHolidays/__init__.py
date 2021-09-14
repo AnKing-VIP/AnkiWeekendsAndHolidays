@@ -25,8 +25,11 @@ def main():
     gui_hooks.profile_did_open.append(setup_compat_aliases)
     gui_hooks.profile_did_open.append(setup_tools_menu_action)
 
-    if conf['execute_at_startup']:
-        gui_hooks.profile_did_open.append(reschedule_all_cards)
+    if conf['execute_on_synch']:
+        gui_hooks.sync_will_start.append(reschedule_all_cards)
+
+    if conf['execute_on_close']:
+        gui_hooks.profile_will_close.append(reschedule_all_cards)
 
 if mw is not None:
     main()
