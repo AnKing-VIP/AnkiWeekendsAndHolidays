@@ -13,5 +13,6 @@
     "execute_on_close": false,
     "max_change_days": 30,
     "max_days_lookahead": 90,
-    "shortcut": "Ctrl+Shift+w"
+    "shortcut": "Ctrl+Shift+w",
+    "no_tooltip": false
 }

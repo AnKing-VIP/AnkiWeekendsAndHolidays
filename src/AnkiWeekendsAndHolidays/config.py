@@ -53,6 +53,9 @@ def general_tab(conf_window: ConfigWindow) -> None:
     tab.checkbox("execute_on_close", "reschedule cards when closing Anki")
     tab.addSpacerItem(QSpacerItem(0, 15))
 
+    tab.checkbox("no_tooltip", "do not show message when rescheduling")
+    tab.addSpacerItem(QSpacerItem(0, 15))
+
     tab.text(
         "<i>You can disable this add-on for specific decks in the deck options</i>", html=True)
     tab.addSpacerItem(QSpacerItem(0, 15))

@@ -148,7 +148,8 @@ def reschedule_all_cards():
             mw.reset()
             return
 
-    tooltip(f"Rescheduled {cnt} card(s)")
+    if not conf.get('no_tooltip'):
+        tooltip(f"Rescheduled {cnt} card(s)")
 
     if ANKI_VERSION_TUPLE < (2, 1, 45):
         mw.col.reset()
