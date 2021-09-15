@@ -46,7 +46,7 @@ def cards_to_reschedule():
 def _possible_relative_days(day, max_diff, days_to_skip):
     min_day = max(day - max_diff, 0)
     max_day = day + max_diff
-    return filter(lambda x: x not in days_to_skip, range(min_day, max_day+1))
+    return list(filter(lambda x: x not in days_to_skip, range(min_day, max_day+1)))
 
 
 def best_relative_day(day, ivl, num_cards_due_on_day, days_to_skip=None):
@@ -109,7 +109,7 @@ def reschedule_card(card, undo_entry_id, num_cards_due_on_day, days_to_skip=None
     return True
 
 
-class CardsDueOnRelativeDayDict(dict):
+class NumCardsDueOnDayDict(dict):
 
     def __missing__(self, key):
         res = self[key] = len(cards_due_on_relative_day(key))
@@ -126,7 +126,7 @@ def reschedule_all_cards():
         mw.checkpoint("Reschedule")
 
     # using this instead of calling len(card(due_on_relative_day(day))) everytime because that is slow
-    num_cards_due_on_day = CardsDueOnRelativeDayDict()
+    num_cards_due_on_day = NumCardsDueOnDayDict()
 
     days_to_skip = dues_to_skip_relative()
     card_ids = cards_to_reschedule()
