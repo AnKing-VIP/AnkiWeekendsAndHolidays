@@ -47,7 +47,7 @@ def general_tab(conf_window: ConfigWindow) -> None:
 
     tab.addSpacerItem(QSpacerItem(0, 15))
 
-    tab.checkbox("execute_on_synch", "reschedule cards before synching")
+    tab.checkbox("execute_on_synch", "reschedule cards before syncing")
     tab.addSpacerItem(QSpacerItem(0, 15))
 
     tab.checkbox("execute_on_close", "reschedule cards when closing Anki")
