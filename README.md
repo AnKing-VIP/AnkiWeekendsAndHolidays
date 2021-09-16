@@ -5,14 +5,18 @@ You must be on Anki 2.1.28 or higher to use this add-on.
 *** Add-on description
 
 <div><b>Screenshots</b></div>
-<b>Before</b>
-<img src="https://raw.githubusercontent.com/ankipalace/AnkiWeekendsAndHolidays/master/screenshots/Before.jpg?raw=true">
+
+<p align="center">
+<b>Before</b><br>
+  <img src="https://raw.githubusercontent.com/ankipalace/AnkiWeekendsAndHolidays/master/screenshots/Before.jpg?raw=true" style="width:60%;"> 
   <br>
-<b>After (skip sundays)</b>
-<img src="https://raw.githubusercontent.com/ankipalace/AnkiWeekendsAndHolidays/master/screenshots/After1.jpg?raw=true">
+<b>After (skip sundays)</b><br>
+<img src="https://raw.githubusercontent.com/ankipalace/AnkiWeekendsAndHolidays/master/screenshots/After1.jpg?raw=true" style="width:60%;">
   <br>
-<b>After (skip weekends)</b>
-<img src="https://raw.githubusercontent.com/ankipalace/AnkiWeekendsAndHolidays/master/screenshots/After2.jpg?raw=true">
+<b>After (skip weekends)</b><br>
+<img src="https://raw.githubusercontent.com/ankipalace/AnkiWeekendsAndHolidays/master/screenshots/After2.jpg?raw=true" style="width:60%;">
+</p>                                                                                                                                      
+
   <br>
   <br>
 
