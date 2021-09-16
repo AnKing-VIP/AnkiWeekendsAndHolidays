@@ -44,8 +44,8 @@ def cards_to_reschedule():
 
 
 def _possible_relative_days(day, max_diff, days_to_skip):
-    min_day = max(day - max_diff, 0)
-    max_day = day + max_diff
+    min_day = max(day - max_diff, 0) if conf.get('reschedule_direction') in ['backward', 'both'] else day
+    max_day = (day + max_diff) if conf.get('reschedule_direction') in ['forward', 'both'] else day
     return list(filter(lambda x: x not in days_to_skip, range(min_day, max_day+1)))
 
 

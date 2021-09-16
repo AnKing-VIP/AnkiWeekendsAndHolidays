@@ -56,6 +56,16 @@ def general_tab(conf_window: ConfigWindow) -> None:
     tab.checkbox("no_tooltip", "do not show message when rescheduling")
     tab.addSpacerItem(QSpacerItem(0, 15))
 
+    options = ['both', 'backward', 'forward']
+    tab.dropdown(
+        "reschedule_direction",
+        options,
+        options,
+        "direction cards will be moved in:",
+        "useful if you e.g. do not want to cards to be moved past an exam date"
+    )
+    tab.addSpacerItem(QSpacerItem(0, 15))
+
     tab.text(
         "<i>You can disable this add-on for specific decks in the deck options</i>", html=True)
     tab.addSpacerItem(QSpacerItem(0, 15))

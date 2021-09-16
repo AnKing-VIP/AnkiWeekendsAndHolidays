@@ -9,6 +9,7 @@
     "skip_sun": true,
     "only_mature_cards": false,
     "min_interval_days": 0,
+    "reschedule_direction": "both",
     "execute_on_synch": false,
     "execute_on_close": false,
     "max_change_days": 30,
