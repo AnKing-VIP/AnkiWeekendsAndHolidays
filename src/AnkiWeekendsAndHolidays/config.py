@@ -1,7 +1,6 @@
 import datetime
-from aqt import mw, Qt
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QDateEdit, QFormLayout, QFrame, QHBoxLayout, QPushButton, QScrollArea, QSpacerItem, QWidget
+from aqt import mw
+from aqt.qt import *
 
 from .ankiaddonconfig import ConfigManager, ConfigWindow
 from .consts import WEEKDAYS_SHORT_NAMES
@@ -98,11 +97,11 @@ def dates_tab(conf_window):
         dates = []
         for row in dates_layout.rows:
             if row.start_edit.date() == row.end_edit.date():
-                dates.append(row.start_edit.date().toString(format=Qt.ISODate))
+                dates.append(row.start_edit.date().toString(format=Qt.DateFormat.ISODate))
             else:
                 dates.append([
-                    row.start_edit.date().toString(format=Qt.ISODate),
-                    row.end_edit.date().toString(format=Qt.ISODate)
+                    row.start_edit.date().toString(format=Qt.DateFormat.ISODate),
+                    row.end_edit.date().toString(format=Qt.DateFormat.ISODate)
                 ])
         conf.set("skip_dates", dates)
 
@@ -177,7 +176,7 @@ def setup_dates_layout(conf_window):
     inner_widget.setLayout(dates_layout)
     scroll = QScrollArea()
     scroll.setWidgetResizable(True)
-    scroll.setFrameShape(QFrame.NoFrame)
+    scroll.setFrameShape(QFrame.Shape.NoFrame)
     scroll.setWidget(inner_widget)
     return dates_layout, scroll
 
@@ -194,19 +193,19 @@ def deleteItemsOfLayout(layout):
 
 
 def add_anking_header(conf_window):
-    conf_window.verticalLayout = QtWidgets.QVBoxLayout()
+    conf_window.verticalLayout = QVBoxLayout()
     conf_window.verticalLayout.setSizeConstraint(
-        QtWidgets.QLayout.SetDefaultConstraint)
+        QLayout.SizeConstraint.SetDefaultConstraint)
     conf_window.verticalLayout.setSpacing(6)
     conf_window.verticalLayout.setObjectName("verticalLayout")
-    result = QtWidgets.QWidget(conf_window)
-    sizePolicy = QtWidgets.QSizePolicy(
-        QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+    result = QWidget(conf_window)
+    sizePolicy = QSizePolicy(
+        QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
     sizePolicy.setHorizontalStretch(0)
     sizePolicy.setVerticalStretch(0)
     sizePolicy.setHeightForWidth(result.sizePolicy().hasHeightForWidth())
     result.setSizePolicy(sizePolicy)
-    result.setMinimumSize(QtCore.QSize(0, 50))
+    result.setMinimumSize(QSize(0, 50))
     result.setObjectName("AnkingHeader")
 
     result = QWidget(conf_window)
@@ -217,21 +216,21 @@ def add_anking_header(conf_window):
 
 
 def add_ankipalace(conf_window):
-    conf_window.horizontalLayout = QtWidgets.QHBoxLayout()
+    conf_window.horizontalLayout = QHBoxLayout()
     conf_window.horizontalLayout.setSizeConstraint(
-        QtWidgets.QLayout.SetFixedSize)
+        QLayout.SizeConstraint.SetFixedSize)
     conf_window.horizontalLayout.setSpacing(0)
     conf_window.horizontalLayout.setObjectName("horizontalLayout")
-    result = QtWidgets.QWidget(conf_window)
+    result = QWidget(conf_window)
     result.setEnabled(True)
-    sizePolicy = QtWidgets.QSizePolicy(
-        QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+    sizePolicy = QSizePolicy(
+        QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
     sizePolicy.setHorizontalStretch(0)
     sizePolicy.setVerticalStretch(0)
     sizePolicy.setHeightForWidth(result.sizePolicy().hasHeightForWidth())
     result.setSizePolicy(sizePolicy)
-    result.setMinimumSize(QtCore.QSize(0, 0))
-    result.setMaximumSize(QtCore.QSize(16777215, 16777215))
+    result.setMinimumSize(QSize(0, 0))
+    result.setMaximumSize(QSize(16777215, 16777215))
     result.setObjectName("AnkiPalace")
     conf_window.horizontalLayout.addWidget(result)
     conf_window.outer_layout.insertLayout(2, conf_window.horizontalLayout)

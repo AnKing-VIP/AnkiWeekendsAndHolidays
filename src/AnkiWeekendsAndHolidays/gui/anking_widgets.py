@@ -1,16 +1,19 @@
+from pathlib import Path
 from typing import Tuple
+
 from aqt.qt import *
 from aqt.utils import openLink
 
+QDir.addSearchPath("icons", f"{Path(__file__).parent}/resources")
 
 def icon_button(icon_data: Tuple[str, Tuple[int, int], str]) -> QToolButton:
     (image, size, url) = icon_data
-    icon = QIcon(QPixmap(f":/AnKing/{image}"))
+    icon = QIcon(QPixmap(f"icons:{image}"))
     button = QToolButton()
     button.setIcon(icon)
     button.setIconSize(QSize(size[0], size[1]))
-    button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-    button.setCursor(QCursor(Qt.PointingHandCursor))
+    button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+    button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
     button.setStyleSheet("QToolButton { border: none; }")
     button.setToolTip(url)
     button.clicked.connect(lambda _, url=url: openLink(url))
