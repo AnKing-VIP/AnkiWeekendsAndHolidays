@@ -9,71 +9,107 @@ from .consts import ANKI_VERSION_TUPLE, WEEKDAYS_SHORT_NAMES
 
 def today_date():
     return datetime.datetime.fromtimestamp(
-        mw.col.crt + mw.col.sched.today*86400).date()
+        mw.col.crt + mw.col.sched.today * 86400
+    ).date()
 
 
 def due_to_date(due):
-    # global datetime
     return today_date() + datetime.timedelta(days=due)
 
 
-def dues_to_skip_relative():
-    res = set()
-    for t in range(conf['max_days_lookahead']):
-        if due_to_date(t).weekday() in weekdays_to_skip():
-            res.add(t)
-        elif due_to_date(t).isoformat() in conf['skip_dates']:
-            res.add(t)
-    return list(res)
+def dues_to_skip():
+    result = set()
+    result = result.union(set(dues_to_skip_because_weekday()))
+    result = result.union(set(dues_to_skip_because_holiday()))
+    return list(result)
+
+
+def dues_to_skip_because_weekday():
+    return [
+        due
+        for due in range(conf["max_days_lookahead"])
+        if due_to_date(due).weekday() in weekdays_to_skip()
+    ]
+
+
+def dues_to_skip_because_holiday():
+    return [due for due in range(conf["max_days_lookahead"]) if is_holiday(due)]
+
+
+def is_holiday(due: int):
+    holiday_date_ranges = [
+        (date := datetime.date.fromisoformat(iso_or_iso_range), date)
+        if isinstance(iso_or_iso_range, str)
+        else [datetime.date.fromisoformat(iso) for iso in iso_or_iso_range]
+        for iso_or_iso_range in conf["skip_dates"]
+    ]
+
+    return any(
+        [
+            start_date <= due_to_date(due) <= end_date
+            for start_date, end_date in holiday_date_ranges
+        ]
+    )
 
 
 def weekdays_to_skip():
     return [
         idx
         for idx, name in enumerate(WEEKDAYS_SHORT_NAMES)
-        if conf['skip_' + name] == True
+        if conf["skip_" + name] == True
     ]
 
 
 def cards_to_reschedule():
-    to_skip = dues_to_skip_relative()
-    res = []
-    for t in to_skip:
-        res += cards_due_on_relative_day(t)
-    return res
+    result = []
+    for due in dues_to_skip():
+        result += cards_due_on_relative_day(due)
+    return result
 
 
-def _possible_relative_days(day, max_diff, days_to_skip):
-    min_day = max(day - max_diff, 0) if conf.get('reschedule_direction') in ['backward', 'both'] else day
-    max_day = (day + max_diff) if conf.get('reschedule_direction') in ['forward', 'both'] else day
-    return list(filter(lambda x: x not in days_to_skip, range(min_day, max_day+1)))
+def possible_due_values(due: int, max_diff: int, days_to_skip):
+    min_due = (
+        max(due - max_diff, 0) # max because negative dues are in the past
+        if conf.get("reschedule_direction") in ["backward", "both"]
+        else due
+    )
+    max_due = (
+        (due + max_diff)
+        if conf.get("reschedule_direction") in ["forward", "both"]
+        else due
+    )
+    return list(filter(lambda x: x not in days_to_skip, range(min_due, max_due + 1)))
 
 
-def best_relative_day(day, ivl, num_cards_due_on_day, days_to_skip=None):
-    days_to_skip = days_to_skip or dues_to_skip_relative()
+def best_due_value(
+    due: int, interval: int, num_cards_due_on_day, days_to_skip=None
+):
+    days_to_skip = days_to_skip or dues_to_skip()
 
-    cur_diff = int(0.1 * ivl)
+    # the bigger the interval of the card, the more days it can be shifted around by
+    # this loop starts with a small time window of candidate_days and increases it more and more when no
+    # candidates are found in this window
+    cur_diff = int(0.1 * interval)
     while True:
-        possible_relative_days = _possible_relative_days(
-            day, cur_diff, days_to_skip)
-        if possible_relative_days:
-            possible_relative_days = sorted(
-                possible_relative_days, key=lambda x: abs(x - day))
-            return min(possible_relative_days, key=lambda x: num_cards_due_on_day[x])
+        if candidate_days := possible_due_values(due, cur_diff, days_to_skip):
+            candidate_days = sorted(candidate_days, key=lambda x: abs(x - due))
+            return min(candidate_days, key=lambda x: num_cards_due_on_day[x])
 
-        cur_diff += max(int(0.05 * ivl), 1)
+        cur_diff += max(int(0.05 * interval), 1)
 
         if cur_diff >= conf.get("max_change_days"):
             return None
 
 
-def cards_due_on_relative_day(day):
-    return mw.col.find_cards(f'prop:due={day}')
+def cards_due_on_relative_day(due: int):
+    return mw.col.find_cards(f"prop:due={due}")
 
 
 def reschedule_card(card, undo_entry_id, num_cards_due_on_day, days_to_skip=None):
 
-    if mw.col.decks.config_dict_for_deck_id(card.current_deck_id()).get('weekends_disabled'):
+    if mw.col.decks.config_dict_for_deck_id(card.current_deck_id()).get(
+        "weekends_disabled"
+    ):
         return False
 
     # Anki considers cards with intervals greater than 21 days as mature
@@ -85,8 +121,12 @@ def reschedule_card(card, undo_entry_id, num_cards_due_on_day, days_to_skip=None
 
     relative_due = card.due - mw.col.sched.today
     try:
-        best_relative_due = best_relative_day(
-            relative_due, card.ivl, num_cards_due_on_day, days_to_skip)
+        best_relative_due = best_due_value(
+            relative_due,
+            card.ivl,
+            num_cards_due_on_day,
+            days_to_skip,
+        )
     # ValueError when no possible date to reschedule,
     # then leave at original due date.
     except ValueError:
@@ -110,7 +150,6 @@ def reschedule_card(card, undo_entry_id, num_cards_due_on_day, days_to_skip=None
 
 
 class NumCardsDueOnDayDict(dict):
-
     def __missing__(self, key):
         res = self[key] = len(cards_due_on_relative_day(key))
         return res
@@ -128,7 +167,7 @@ def reschedule_all_cards():
     # using this instead of calling len(card(due_on_relative_day(day))) everytime because that is slow
     num_cards_due_on_day = NumCardsDueOnDayDict()
 
-    days_to_skip = dues_to_skip_relative()
+    days_to_skip = dues_to_skip()
     card_ids = cards_to_reschedule()
     cards = [mw.col.get_card(cid) for cid in card_ids]
     cnt = 0
@@ -149,7 +188,7 @@ def reschedule_all_cards():
             mw.reset()
             return
 
-    if not conf.get('no_tooltip'):
+    if not conf.get("no_tooltip"):
         tooltip(f"Rescheduled {cnt} card(s)")
 
     if ANKI_VERSION_TUPLE < (2, 1, 45):
