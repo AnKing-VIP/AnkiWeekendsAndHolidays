@@ -11,6 +11,8 @@ from .errors import InvalidConfigValueError
 if TYPE_CHECKING:
     from .manager import ConfigManager
 
+QT6 = QT_VERSION_STR.split(".")[0] == "6"
+
 
 class ConfigWindow(QDialog):
     def __init__(self, conf: "ConfigManager") -> None:
@@ -77,20 +79,18 @@ class ConfigWindow(QDialog):
                 run=False,
             )
             button = QPushButton("Quit Config")
-            bbox.addButton(button, QDialogButtonBox.DestructiveRole)
-            bbox.button(QDialogButtonBox.Close).setDefault(True)
+            bbox.addButton(button, QDialogButtonBox.ButtonRole.DestructiveRole)
+            bbox.button(QDialogButtonBox.StandardButton.Close).setDefault(True)
 
             def quit() -> None:
-                dial.close()
-                advanced.close()
                 self.widget_updates = []
+                dial.close()
+                advanced.reject()
                 self.close()
 
             button.clicked.connect(quit)
+            dial.setModal(True)
             dial.show()
-            advanced.exec()
-            self.conf.load()
-            self.update_widgets()
 
     def on_open(self) -> None:
         self.update_widgets()
@@ -114,14 +114,19 @@ class ConfigWindow(QDialog):
         tooltip("Press save to save changes")
 
     def on_advanced(self) -> None:
-        self.advanced_window().exec()
-        self.conf.load()
-        self.update_widgets()
+        self.advanced_window()
 
     def advanced_window(self) -> aqt.addons.ConfigEditor:
-        return aqt.addons.ConfigEditor(
+        def on_finish(result: int) -> None:
+            self.conf.load()
+            self.update_widgets()
+
+        diag = aqt.addons.ConfigEditor(
             self, self.conf.addon_dir, self.conf._config  # type: ignore
         )
+        diag.finished.connect(on_finish)
+        diag.show()
+        return diag
 
     def closeEvent(self, evt: QCloseEvent) -> None:
         # Discard the contents when clicked cancel,
@@ -201,7 +206,12 @@ class ConfigLayout(QBoxLayout):
 
         self.widget_updates.append(update)
 
-        checkbox.stateChanged.connect(lambda s: self.conf.set(key, s == Qt.CheckState.Checked))
+        checkbox.stateChanged.connect(
+            lambda s: self.conf.set(
+                key,
+                s == (Qt.CheckState.Checked.value if QT6 else Qt.CheckState.Checked),
+            )
+        )
         self.addWidget(checkbox)
         return checkbox
 
@@ -284,9 +294,9 @@ class ConfigLayout(QBoxLayout):
         step: int = 1,
         decimal: bool = False,
         precision: int = 2,
-    ) -> QAbstractSpinBox:
+    ) -> Union[QDoubleSpinBox, QSpinBox]:
         "For integer config"
-        spin_box: QAbstractSpinBox
+        spin_box: Union[QDoubleSpinBox, QSpinBox]
         if decimal:
             spin_box = QDoubleSpinBox()
             spin_box.setDecimals(precision)
@@ -329,9 +339,16 @@ class ConfigLayout(QBoxLayout):
         return spin_box
 
     def color_input(
-        self, key: str, description: Optional[str] = None, tooltip: Optional[str] = None
+        self,
+        key: str,
+        description: Optional[str] = None,
+        tooltip: Optional[str] = None,
+        opacity: bool = False,
     ) -> QPushButton:
-        "For hex color config"
+        """For hex color config.
+        If opacity is true, allows changing opacity. Note that color is stored in RGBA format, not ARGB.
+            When creating using the RGBA in Qt, you need to change it to ARGB format first.
+        """
         button = QPushButton()
         button.setFixedWidth(25)
         button.setFixedHeight(25)
@@ -340,14 +357,19 @@ class ConfigLayout(QBoxLayout):
             button.setToolTip(tooltip)
 
         color_dialog = QColorDialog(self.config_window)
+        if opacity:
+            color_dialog.setOptions(QColorDialog.ShowAlphaChannel)
 
         def set_color(rgb: str) -> None:
+            if len(rgb) == 9:
+                rgb = "#" + rgb[7:] + rgb[1:7]  # RGBA to ARGB
+
             button.setStyleSheet(
                 'QPushButton{ background-color: "%s"; border: none; border-radius: 3px}'
-                % rgb
+                % rgb  # QT bug? CSS accepts ARGB instead of RGBA.
             )
             color = QColor()
-            color.setNamedColor(rgb)
+            color.setNamedColor(rgb)  # Accepts #RGB, #RRGGBB or #AARRGGBB
             if not color.isValid():
                 raise InvalidConfigValueError(key, "rgb hex color string", rgb)
             color_dialog.setCurrentColor(color)
@@ -357,7 +379,11 @@ class ConfigLayout(QBoxLayout):
             set_color(value)
 
         def save(color: QColor) -> None:
-            rgb = color.name(QColor.HexRgb)
+            if opacity:
+                rgb = color.name(QColor.NameFormat.HexArgb)
+                rgb = "#" + rgb[3:] + rgb[1:3]  # ARGB to RGBA
+            else:
+                rgb = color.name()
             self.conf.set(key, rgb)
             set_color(rgb)
 
@@ -437,7 +463,9 @@ class ConfigLayout(QBoxLayout):
         tooltip: Optional[str] = None,
     ) -> QLabel:
         label_widget = QLabel(text)
-        label_widget.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
+        label_widget.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextBrowserInteraction
+        )
         if html:
             label_widget.setTextFormat(Qt.TextFormat.RichText)
             label_widget.setOpenExternalLinks(True)
@@ -471,7 +499,9 @@ class ConfigLayout(QBoxLayout):
 
         on_click is provided 1 argument: 'url'.
         """
-        css = "text-decoration: none; color: palette(text);"
+        css = "text-decoration: none;"
+        if color:
+            css += f" color: {color};"
         if size:
             css += f" font-size: {size}px;"
         label = QLabel(f'<a href="{url}" style="{css}">{text}</a>')
@@ -485,7 +515,7 @@ class ConfigLayout(QBoxLayout):
         return label
 
     def _separator(self, direction: QFrame.Shape) -> QFrame:
-        """direction should be either QFrame.Shape.HLine or QFrame.Shape.VLine"""
+        """direction should be either QFrame.HLine or QFrame.VLine"""
         line = QFrame()
         line.setLineWidth(0)
         line.setFrameShape(direction)
@@ -497,7 +527,7 @@ class ConfigLayout(QBoxLayout):
         return self._separator(QFrame.Shape.HLine)
 
     def vseparator(self) -> QFrame:
-        return self._separator(QFrame.VLine)
+        return self._separator(QFrame.Shape.VLine)
 
     def _container(self, direction: QBoxLayout.Direction) -> "ConfigLayout":
         """Adds (empty) QWidget > ConfigLayout.
@@ -512,7 +542,7 @@ class ConfigLayout(QBoxLayout):
 
     def hcontainer(self) -> "ConfigLayout":
         """Adds (empty) QWidget > ConfigLayout."""
-        return self._container(QBoxLayout.RightToLeft)
+        return self._container(QBoxLayout.Direction.RightToLeft)
 
     def vcontainer(self) -> "ConfigLayout":
         """Adds (empty) QWidget > ConfigLayout."""
@@ -559,20 +589,30 @@ class ConfigLayout(QBoxLayout):
 
     def hscroll_layout(self, always: bool = False) -> "ConfigLayout":
         """Adds QScrollArea > QWidget*2 > ConfigLayout, returns the layout."""
+        scroll = (
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOn
+            if always
+            else Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        )
         return self._scroll_layout(
             QSizePolicy.Policy.Expanding,
             QSizePolicy.Policy.Minimum,
-            Qt.ScrollBarAlwaysOn if always else Qt.ScrollBarPolicy.ScrollBarAsNeeded,
-            Qt.ScrollBarAlwaysOff,
+            scroll,
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff,
         )
 
     def vscroll_layout(self, always: bool = False) -> "ConfigLayout":
         """Adds QScrollArea > QWidget*2 > ConfigLayout, returns the layout."""
+        scroll = (
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOn
+            if always
+            else Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        )
         return self._scroll_layout(
             QSizePolicy.Policy.Minimum,
             QSizePolicy.Policy.Expanding,
-            Qt.ScrollBarAlwaysOff,
-            Qt.ScrollBarAlwaysOn if always else Qt.ScrollBarPolicy.ScrollBarAsNeeded,
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff,
+            scroll,
         )
 
     def scroll_layout(
@@ -583,7 +623,7 @@ class ConfigLayout(QBoxLayout):
         """Legacy. Adds QScrollArea > QWidget*2 > ConfigLayout, returns the layout."""
         return self._scroll_layout(
             QSizePolicy.Policy.Expanding if horizontal else QSizePolicy.Policy.Minimum,
-            QSizePolicy.Policy.Expanding if vertical else QSizePolicy.Policy.Minimum,
+            QSizePolicy.Policy.Expanding if vertical else QSizePolicy.Minimum,
             Qt.ScrollBarPolicy.ScrollBarAsNeeded,
             Qt.ScrollBarPolicy.ScrollBarAsNeeded,
         )
