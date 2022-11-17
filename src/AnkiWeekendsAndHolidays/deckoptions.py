@@ -68,10 +68,10 @@ def setup_ui(self, Dialog):
 def load_conf(self):
     f = self.form
     c = self.conf
-    f.DisableFW.setCheckState(c.get("weekends_disabled", 0))
+    f.DisableFW.setChecked(c.get("weekends_disabled", 0))
 
 
 def save_conf(self):
     f = self.form
     c = self.conf
-    c["weekends_disabled"] = int(f.DisableFW.checkState())
+    c["weekends_disabled"] = int(f.DisableFW.isChecked())
