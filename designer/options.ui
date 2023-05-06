@@ -221,7 +221,7 @@
         <enum>QLayout::SetFixedSize</enum>
        </property>
        <item>
-        <widget class="QWidget" name="AnkiPalace" native="true">
+        <widget class="QWidget" name="AnkiMasteryCourse" native="true">
          <property name="enabled">
           <bool>true</bool>
          </property>

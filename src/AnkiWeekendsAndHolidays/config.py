@@ -4,7 +4,7 @@ from aqt.qt import *
 
 from .ankiaddonconfig import ConfigManager, ConfigWindow
 from .consts import WEEKDAYS_SHORT_NAMES
-from .gui.anking_widgets import AnkingIconsLayout, AnkiPalaceLayout
+from .gui.anking_widgets import AnkingIconsLayout, AnkiMasteryCourseLayout
 
 if mw is not None:
     conf = ConfigManager()
@@ -215,7 +215,7 @@ def add_anking_header(conf_window):
     return result
 
 
-def add_ankipalace(conf_window):
+def add_mastery_course(conf_window):
     conf_window.horizontalLayout = QHBoxLayout()
     conf_window.horizontalLayout.setSizeConstraint(
         QLayout.SizeConstraint.SetFixedSize)
@@ -231,7 +231,7 @@ def add_ankipalace(conf_window):
     result.setSizePolicy(sizePolicy)
     result.setMinimumSize(QSize(0, 0))
     result.setMaximumSize(QSize(16777215, 16777215))
-    result.setObjectName("AnkiPalace")
+    result.setObjectName("AnkiMasteryCourse")
     conf_window.horizontalLayout.addWidget(result)
     conf_window.outer_layout.insertLayout(2, conf_window.horizontalLayout)
 
@@ -242,8 +242,8 @@ def add_anking_elements(window):
     window.AnkingHeader = add_anking_header(window)
     AnkingIconsLayout(window.AnkingHeader)
 
-    window.AnkiPalace = add_ankipalace(window)
-    AnkiPalaceLayout(window.AnkiPalace)
+    window.AnkiMasteryCourse = add_mastery_course(window)
+    AnkiMasteryCourseLayout(window.AnkiMasteryCourse)
 
 
 def setup_config():
