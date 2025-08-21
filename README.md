@@ -1,3 +1,5 @@
+<b>With the advent of FSRS scheduling, the newest versions of Anki come with a built-in option to reduce reviews on any day of the week. This add-on may still be useful for Anki users who choose not to use FSRS.</b>
+
 <b>This add-on was funded by Anki Mastery Course. Please consider supporting our work using the links below so we can continue to fund add-on projects like this.</b>
 
 You must be on Anki 2.1.28 or higher to use this add-on.
