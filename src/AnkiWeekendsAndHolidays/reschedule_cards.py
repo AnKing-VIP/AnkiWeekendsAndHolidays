@@ -4,7 +4,7 @@ from aqt import mw
 from aqt.utils import tooltip
 
 from .config import conf
-from .consts import ANKI_VERSION_TUPLE, WEEKDAYS_SHORT_NAMES
+from .consts import ANKI_VERSION, WEEKDAYS_SHORT_NAMES
 
 
 def today_date():
@@ -140,7 +140,7 @@ def reschedule_card(card, undo_entry_id, num_cards_due_on_day, days_to_skip=None
 
     num_cards_due_on_day[best_relative_due] += 1
 
-    if ANKI_VERSION_TUPLE >= (2, 1, 45):
+    if ANKI_VERSION >= 45:
         mw.col.update_card(card)
         mw.col.merge_undo_entries(undo_entry_id)
     else:
@@ -159,7 +159,7 @@ def reschedule_all_cards():
 
     # if anki version is >= 2.1.45, the new undo system is used and the old otherwise
     undo_entry_id = None
-    if ANKI_VERSION_TUPLE >= (2, 1, 45):
+    if ANKI_VERSION >= 45:
         undo_entry_id = mw.col.add_custom_undo_entry("Rescheduling")
     else:
         mw.checkpoint("Reschedule")
@@ -181,7 +181,7 @@ def reschedule_all_cards():
 
         if mw.progress.want_cancel():
             mw.progress.finish()
-            if ANKI_VERSION_TUPLE >= (2, 1, 45):
+            if ANKI_VERSION >= 45:
                 mw.col.undo()
             else:
                 mw.col.undo_legacy()
@@ -191,7 +191,7 @@ def reschedule_all_cards():
     if not conf.get("no_tooltip"):
         tooltip(f"Rescheduled {cnt} card(s)")
 
-    if ANKI_VERSION_TUPLE < (2, 1, 45):
+    if ANKI_VERSION < 45:
         mw.col.reset()
 
     mw.progress.finish()

@@ -6,7 +6,7 @@ from anki.hooks import wrap
 from aqt import deckconf, gui_hooks
 from aqt.qt import *
 
-from .consts import ANKI_VERSION_TUPLE
+from .consts import ANKI_VERSION
 
 try:
     _fromUtf8 = QString.fromUtf8 # type: ignore
@@ -17,7 +17,7 @@ except Exception:
 
 
 def setup_deck_options():
-    if ANKI_VERSION_TUPLE >= (2, 1, 45):
+    if ANKI_VERSION >= 45:
         setup_new_deck_options()
 
     setup_old_deck_options()
